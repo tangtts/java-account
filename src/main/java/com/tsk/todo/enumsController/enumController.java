@@ -1,6 +1,7 @@
 package com.tsk.todo.enumsController;
 
 import com.tsk.todo.enums.PayAccountEnum;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,9 +15,10 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("enums")
+@CrossOrigin("*")
 public class enumController {
     @GetMapping("payAccountEnum")
-    public List<Map<String, Object>> payAccountEnum(){
+    public List<Map<String, Object>> payAccountEnum() {
         return PayAccountEnum.getAll();
     }
 }

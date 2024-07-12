@@ -13,10 +13,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("user")
+@CrossOrigin(origins = "*")
 public class UserController {
 
   @Resource()
-  private  UserService userService;
+  private  IUserService userService;
 
   @GetMapping()
   public CommonResp<List<User>> getUser(){
@@ -33,4 +34,10 @@ public class UserController {
   public ResultResponse<String> register(@Valid @RequestBody RegisterReq user){
     return userService.register(user);
   }
+
+  @GetMapping("/detail")
+  public ResultResponse<User> getUserById(){
+    return userService.getUserDetail();
+  }
+
 }

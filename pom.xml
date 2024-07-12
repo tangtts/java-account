@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.tsk</groupId>
-    <artifactId>todo</artifactId>
+    <artifactId>account</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>todo</name>
-    <description>todo</description>
+    <name>account</name>
+    <description>account</description>
     <url/>
     <licenses>
         <license/>
@@ -42,6 +42,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
         </dependency>
 
         <dependency>

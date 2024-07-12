@@ -27,6 +27,9 @@ public class AddCostOrIncomeReq {
     @NotBlank(message = "支付方式不能为空")
     private Integer payAccount;
 
+    @NotBlank(message = "分类不能为空")
+    private Integer categoryId;
+
     @NotBlank(message = "消费时间不能为空")
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime time;

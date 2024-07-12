@@ -14,4 +14,7 @@ public interface IUserService extends IService<User> {
     ResultResponse<String> register(RegisterReq user);
 
     ResultResponse<String> login(LoginReq loginReq);
+
+    ResultResponse<User> getUserDetail();
+//    ResultResponse<String> updatePassword();
 }

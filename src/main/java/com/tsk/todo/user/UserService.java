@@ -56,4 +56,9 @@ public class UserService extends ServiceImpl<UserMapper, User> implements IUserS
             return ResultResponse.error(StatusEnum.UNAUTHORIZED, "用户还未注册");
         }
     }
+
+    public ResultResponse<User> getUserDetail(){
+//        todo 先暂定为 1
+        return ResultResponse.success(userMapper.selectById(1));
+    }
 }

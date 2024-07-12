@@ -22,4 +22,6 @@ public class User extends CommonPojo implements Serializable {
     private String password;
 
     private String phoneNumber;
+//    头像
+    private String avatar;
 }

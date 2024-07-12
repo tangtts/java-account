@@ -3,6 +3,7 @@ package com.tsk.todo.pojo;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,11 +18,16 @@ import java.util.List;
  */
 @Getter
 @Setter
-@TableName("recodes")
+@TableName("records")
 public class RecordsPojo extends CommonPojo implements Serializable {
+
     @TableId
-    private Integer recodeId;
+    private Integer recordId;
+    @JsonIgnore
     private Integer userId;
+
+    //    分类
+    private Integer categoryId;
 
     //    消费或者支出
     private Integer incomeOrExpand;
@@ -31,7 +37,7 @@ public class RecordsPojo extends CommonPojo implements Serializable {
     private String remark;
     //    消费时间，不一定是创建时间
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime time;
+    private Long time;
 
     //    支付方式
     private Integer payAccount;
