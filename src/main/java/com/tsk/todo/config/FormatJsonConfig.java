@@ -9,10 +9,12 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -20,16 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-public class FormatJsonConfig extends WebMvcConfigurationSupport {
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        System.out.println("解决跨域2");
-        registry.addMapping("/**") // 对所有路径生效
-                .allowedOrigins("*") // 允许的源地址（数组）
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 允许的请求方法
-                .allowedHeaders("*"); // 允许的请求头
-    }
+public class FormatJsonConfig implements WebMvcConfigurer {
 
     /**
      * 使用阿里 FastJson 作为JSON MessageConverter
@@ -42,6 +35,7 @@ public class FormatJsonConfig extends WebMvcConfigurationSupport {
 
         converter.setFastJsonConfig(config);
         converter.setDefaultCharset(StandardCharsets.UTF_8);
+        // 设置支持的 MediaType
         List<MediaType> mediaTypeList = new ArrayList<>();
         mediaTypeList.add(MediaType.APPLICATION_JSON);
         converter.setSupportedMediaTypes(mediaTypeList);
@@ -62,8 +56,10 @@ public class FormatJsonConfig extends WebMvcConfigurationSupport {
                 // 将Boolean类型的null转成false
                 SerializerFeature.WriteNullBooleanAsFalse,
                 // 避免循环引用
-                SerializerFeature.DisableCircularReferenceDetect);
+                SerializerFeature.DisableCircularReferenceDetect
+                );
         return config;
-    }
+    };
+
 }
 

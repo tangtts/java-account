@@ -16,28 +16,35 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
 
-  @Resource()
-  private  IUserService userService;
+    @Resource()
+    private SysLoginService userService;
 
-  @GetMapping()
-  public CommonResp<List<User>> getUser(){
-    List<User> list = userService.list();
-    return  new CommonResp<>(list);
-  }
+    @GetMapping()
+    public CommonResp<List<User>> getUser() {
+        List<User> list = userService.list();
+        return new CommonResp<>(list);
+    }
 
-  @PostMapping("login")
-  public ResultResponse<String> login(@Valid @RequestBody LoginReq login){
-    return userService.login(login);
-  }
 
-  @PostMapping("/register")
-  public ResultResponse<String> register(@Valid @RequestBody RegisterReq user){
-    return userService.register(user);
-  }
+    @PostMapping("login")
+    public ResultResponse<String> login(@RequestBody LoginReq loginReq) {
+        return userService.login(loginReq);
+    }
 
-  @GetMapping("/detail")
-  public ResultResponse<User> getUserById(){
-    return userService.getUserDetail();
-  }
+    @PostMapping("/register")
+    public ResultResponse<String> register(@Valid @RequestBody RegisterReq user) {
+        return userService.register(user);
+    }
+
+
+    @PostMapping("/update")
+    public ResultResponse<String> update(@Valid @RequestBody User user) {
+        return userService.update(user);
+    }
+
+    @GetMapping("/detail")
+    public ResultResponse<User> getUserById() {
+        return userService.getUserDetail();
+    }
 
 }

@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,6 +43,5 @@ public class RecordsPojo extends CommonPojo implements Serializable {
     //    支付方式
     private Integer payAccount;
 
-    private List<String> picUrls;
-
+    private List<String> picUrls = new ArrayList<>();
 }

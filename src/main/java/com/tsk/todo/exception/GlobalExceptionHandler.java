@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -87,6 +88,11 @@ public class GlobalExceptionHandler {
         return ResultResponse.error(StatusEnum.METHOD_NOT_ALLOWED, ex.getMessage());
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public  ResultResponse<String> accessDeniedException(RuntimeException e) {
+        log.error("运行时异常:{}", e.getMessage());
+        throw e;
+    }
 
 
 

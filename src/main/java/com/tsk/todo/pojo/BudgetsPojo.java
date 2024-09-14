@@ -2,6 +2,7 @@ package com.tsk.todo.pojo;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,12 +25,14 @@ public class BudgetsPojo extends CommonPojo implements Serializable {
     private Integer userId;
 
     //  起始时间
-    private long startTime;
+    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    private Long  startTime;
 
 //    终止时间
-    private long endTime;
+@JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    private Long endTime;
 
 //    预算数量
-    private float count;
+    private float count = 0.0f;
 
 }

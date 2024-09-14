@@ -54,9 +54,6 @@ public class BudgetService extends ServiceImpl<BudgetsMapper, BudgetsPojo> imple
     public ResultResponse<HashMap<String, Object>> getDetail(String startTime, String endTime) {
         Long startTimestamp = this.formatStrToTimestamp(startTime);
         Long endTimestamp = this.formatStrToTimestamp(endTime) + oneDayTimestamp;
-        // 1720972800000 1720972800000
-        System.out.println("startTime:{}" + startTimestamp);
-        System.out.println("endTime:{}"+endTimestamp);
         LambdaQueryWrapper<BudgetsPojo> pojoLambdaQueryWrapper = new LambdaQueryWrapper<>();
         pojoLambdaQueryWrapper.allEq(
                 Map.of(
@@ -66,32 +63,36 @@ public class BudgetService extends ServiceImpl<BudgetsMapper, BudgetsPojo> imple
                 )
         );
 
+//        根据时间获取消费和支出
         Map<String, Float> map = costOrIncomeService.getCostAndIncome(startTimestamp, endTimestamp);
+
         BudgetsPojo one = getOne(pojoLambdaQueryWrapper);
         HashMap<String, Object> objectObjectHashMap = new HashMap<>();
 
-
         if (ObjectUtil.isNotNull(one)) {
+//            生成 { income:0,cost:0,count:0 }
             objectObjectHashMap.put("count", one.getCount());
             objectObjectHashMap.put("cost", map.get("cost"));
             objectObjectHashMap.put("income", map.get("income"));
             objectObjectHashMap.put("budgetId", one.getBudgetId());
-            return ResultResponse.success(objectObjectHashMap);
         } else {
             BudgetsPojo budgetsPojo = new BudgetsPojo();
-            objectObjectHashMap.put("count", 0f);
+            objectObjectHashMap.put("count", map.get("budgetCount"));
             objectObjectHashMap.put("cost", map.get("cost"));
             objectObjectHashMap.put("income", map.get("income"));
 
-            budgetsPojo.setCount(0f);
+            budgetsPojo.setCount(map.get("budgetCount"));
+            System.out.println(map.get("budgetCount"));
             budgetsPojo.setStartTime(startTimestamp);
-            budgetsPojo.setEndTime(endTimestamp + oneDayTimestamp);
+            budgetsPojo.setEndTime(endTimestamp);
+//           todo 先默认为 1
             budgetsPojo.setUserId(1);
             Integer budgetId = budgetsMapper.insertWithId(budgetsPojo);
+
             budgetsPojo.setBudgetId(budgetId);
             objectObjectHashMap.put("budgetId", budgetId);
-            return ResultResponse.success(objectObjectHashMap);
         }
+        return ResultResponse.success(objectObjectHashMap);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.tsk.todo.upload;
 
+import com.tsk.todo.exception.ResultResponse;
+import com.tsk.todo.exception.StatusEnum;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 /**
@@ -22,26 +29,30 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @RequestMapping("/upload")
 public class uploadController {
     @PostMapping
-    public String upload(@RequestParam("file") MultipartFile file) {
+    public ResultResponse upload(@RequestParam("file") MultipartFile file) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = "https://picui.cn/api/v1";
+        String url = "https://picui.cn/api/v1/upload";
 
         MultiValueMap<String, Object> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("file", file.getResource()); // 将MultipartFile转换为FileResource添加到MultiValueMap
+        requestBody.add("file", file.getResource());
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.parseMediaType(MULTIPART_FORM_DATA_VALUE));
-        httpHeaders.set(HttpHeaders.AUTHORIZATION,"Bearer 348|NQlBff1Zx3wWi2C3gUCPP0ZofNPRlmsNgnwAbXDN");
+        httpHeaders.setContentType(MediaType.valueOf(MULTIPART_FORM_DATA_VALUE));
+
+        httpHeaders.setAccept((List.of(APPLICATION_JSON)));
+
+        httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer 465|ITEG4ZZSDvryY1Swj6uejkpQg4mLs2VwPFdVFo6c");
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(requestBody, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+
         String responseBody = responseEntity.getBody();
         int statusCode = responseEntity.getStatusCode().value();
-        HttpHeaders responseHeaders = responseEntity.getHeaders();
 
-        System.out.println("Response body: " + responseBody);
-        System.out.println("Status code: " + statusCode);
-        System.out.println("Response headers: " + responseHeaders);
-        return "上传成功";
+        if (statusCode == 200) {
+            return ResultResponse.success(responseBody);
+        } else {
+            return ResultResponse.error(StatusEnum.SERVICE_ERROR, "上传失败");
+        }
     }
 }

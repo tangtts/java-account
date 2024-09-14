@@ -7,7 +7,7 @@ import com.tsk.todo.req.LoginReq;
 
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.UUID;
 /**
  * @author Tsk
  * @date 2024/6/26 0026
@@ -15,26 +15,46 @@ import java.util.Map;
 public class JwtUtil {
     static private final String JWT_SECRET = "1234";
 
-   static public String encodeJwt(LoginReq loginReq) {
-        Map<String, Object> map = new HashMap<String, Object>() {
-            private static final long serialVersionUID = 1L;
+    public static String getUUID(){
 
-            {
-                put("phoneNumber", loginReq.getPhoneNumber());
-                put("expire_time", System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 15);
-            }
-        };
-        return JWTUtil.createToken(map, JWT_SECRET.getBytes());
+        return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+
+    /**
+     * 生成jtw
+     * @param subject token中要存放的数据（json格式）
+     * @return
+     */
+
+
+   static public String encodeJwt(LoginReq loginReq) {
+      return JWT.create()
+               .setPayload("phoneNumber", loginReq.getPhoneNumber())
+               .setPayload("expire_time", System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 15)
+               .setKey(JWT_SECRET.getBytes())
+               .sign();
     }
 
    static public Object decodeJwt(String token) {
-        if (JWTUtil.verify(token, JWT_SECRET.getBytes())) {
-            final JWT jwt = JWTUtil.parseToken(token);
+        if (JWT.of(token).setKey(JWT_SECRET.getBytes()).validate(0)) {
+            JWT jwt = JWT.of(token);
             jwt.getHeader(JWTHeader.TYPE);
-            return jwt.getPayload("sub");
+           return jwt.getPayload("phoneNumber");
         }
         throw new RuntimeException();
     }
+
+     public static void main(String[] args){
+
+
+
+
+
+
+         System.out.println(123);
+         System.out.println(234);
+
+     };
     static public boolean verifyJwt(String token) {
         return JWTUtil.verify(token, JWT_SECRET.getBytes());
     }

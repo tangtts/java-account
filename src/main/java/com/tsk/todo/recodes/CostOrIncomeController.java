@@ -16,7 +16,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("costOrIncome")
-@CrossOrigin("*")
 public class CostOrIncomeController {
 
     @Resource
@@ -44,6 +43,7 @@ public class CostOrIncomeController {
     }
 
 
+// 获取首页统计数据
     @GetMapping("/listSep")
     public ResultResponse<Map<String, Double>> getAllRecordsSeparate() {
         return costOrIncomeService.getAllRecordsSeparate();

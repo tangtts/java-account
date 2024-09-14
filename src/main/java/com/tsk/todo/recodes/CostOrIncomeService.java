@@ -3,12 +3,18 @@ package com.tsk.todo.recodes;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tsk.todo.budgets.BudgetService;
 import com.tsk.todo.exception.ResultResponse;
+import com.tsk.todo.mapper.BudgetsMapper;
 import com.tsk.todo.mapper.RecordsMapper;
+import com.tsk.todo.pojo.BudgetsPojo;
 import com.tsk.todo.pojo.CategoriesPojo;
 import com.tsk.todo.pojo.RecordsPojo;
 import com.tsk.todo.req.AddCostOrIncomeReq;
+import com.tsk.todo.util.AuthUtils;
+import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -25,21 +31,28 @@ import java.util.stream.Collectors;
  */
 @Service
 public class CostOrIncomeService extends ServiceImpl<RecordsMapper, RecordsPojo> implements ICostOrIncomeService {
+
+    @Resource
+    private BudgetsMapper budgetsMapper;
+
+    @Resource
+    private RecordsMapper recordsMapper;
+
     public ResultResponse<String> add(AddCostOrIncomeReq addCostOrIncomeReq) {
         RecordsPojo recordsPojo = new RecordsPojo();
         recordsPojo.setIncomeOrExpand(addCostOrIncomeReq.getIncomeOrExpand());
         recordsPojo.setMoney(addCostOrIncomeReq.getMoney());
         recordsPojo.setPayAccount(addCostOrIncomeReq.getPayAccount());
         recordsPojo.setRemark(addCostOrIncomeReq.getRemark());
-//        TODO 图片
-//        recordsPojo.setPicUrls(addCostOrIncomeReq.getPicUrls());
-        recordsPojo.setCategoryId(addCostOrIncomeReq.getCategoryId());
+        recordsPojo.setPicUrls(addCostOrIncomeReq.getPicUrls());
 
+        recordsPojo.setCategoryId(addCostOrIncomeReq.getCategoryId());
+        // 转换成时间戳
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime localDateTime = addCostOrIncomeReq.getTime();
         long epochMilli = localDateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
-
         recordsPojo.setTime(epochMilli);
-        recordsPojo.setUserId(1);
+        recordsPojo.setUserId(AuthUtils.getLoginUserId());
         this.save(recordsPojo);
         return ResultResponse.success("添加成功");
     }
@@ -56,10 +69,12 @@ public class CostOrIncomeService extends ServiceImpl<RecordsMapper, RecordsPojo>
         HashMap<String, Float> map = new HashMap<>();
         map.put("cost", 0f);
         map.put("income", 1f);
+        map.put("budgetCount", 0f);
+
         LambdaQueryWrapper<RecordsPojo> recordsPojoLambdaQueryWrapper = new LambdaQueryWrapper<>();
         recordsPojoLambdaQueryWrapper.between(RecordsPojo::getTime, startTimestamp, endTimestamp);
         List<RecordsPojo> recordsPojos = list(recordsPojoLambdaQueryWrapper);
-
+// 消费支出记录
         for (RecordsPojo recordsPojo : recordsPojos) {
             if (recordsPojo.getIncomeOrExpand() == 0) {
                 map.put("cost", map.get("cost") + recordsPojo.getMoney());
@@ -67,9 +82,16 @@ public class CostOrIncomeService extends ServiceImpl<RecordsMapper, RecordsPojo>
                 map.put("income", map.get("income") + recordsPojo.getMoney());
             }
         }
+//        预算
+        LambdaQueryWrapper<BudgetsPojo> budgetsPojoLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        budgetsPojoLambdaQueryWrapper.ge(BudgetsPojo::getStartTime, startTimestamp);
+        budgetsPojoLambdaQueryWrapper.le(BudgetsPojo::getEndTime, endTimestamp);
+        List<BudgetsPojo> budgetsPojos = budgetsMapper.selectList(budgetsPojoLambdaQueryWrapper);
+        for (BudgetsPojo budgetsPojo : budgetsPojos) {
+            map.put("budgetCount", map.get("budgetCount") + budgetsPojo.getCount());
+        }
         return map;
     }
-
 
     public ResultResponse<List<RecordsPojo>> getAllRecords(String incomeOrCost, String startTime, String endTime) {
         long startTimeLong = this.formatStrToTimestamp(startTime);
@@ -86,7 +108,10 @@ public class CostOrIncomeService extends ServiceImpl<RecordsMapper, RecordsPojo>
     }
 
     public ResultResponse<Map<String, Double>> getAllRecordsSeparate() {
-        List<RecordsPojo> recordsPojoList = list();
+
+        Integer loginUserId = AuthUtils.getLoginUserId();
+        List<RecordsPojo> recordsPojoList = recordsMapper.selectList(new LambdaQueryWrapper<RecordsPojo>().eq(RecordsPojo::getUserId, loginUserId));
+
         Map<String, Double> summary = new HashMap<>();
         // 分别计算今天、本周、本月的收入和支出
         calculateSummary(recordsPojoList, this::isInToday, summary, "inToday");
@@ -100,10 +125,10 @@ public class CostOrIncomeService extends ServiceImpl<RecordsMapper, RecordsPojo>
         return ResultResponse.success(one);
     }
 
-    private void calculateSummary(List<RecordsPojo> records, java.util.function.Predicate<Long> condition,
+    private void calculateSummary(List<RecordsPojo> records,
+                                  java.util.function.Predicate<Long> condition,
                                   Map<String, Double> summary, String prefix) {
 
-//        stream 流
         Map<Integer, Double> groupedByType = records.stream()
                 .filter(record -> condition.test(record.getTime()))
                 .collect(Collectors.groupingBy(
